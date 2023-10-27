@@ -1,19 +1,33 @@
 function get-UserFromSID {
     $inputSID = Read-Host -Prompt "Enter an SID to translate"
     $SID = New-Object System.Security.Principal.SecurityIdentifier ($inputSID)
-    $userObject = $SID.Translate([System.Security.Principal.NTAccount]) 
-    Write-Host 'The friendly name of this SID is' $userObject.Value
+
+    try {$userObject = $SID.Translate([System.Security.Principal.NTAccount])}
+    catch {Write-Host "User not found" -ForegroundColor Red}
+    
+    if ($userObject.Value) {
+        Write-Host 'The friendly name of this SID is' $userObject.Value -ForegroundColor Green
+    }
 }
 
 function get-SIDFromUser {
 $inputUserObject = Read-Host -Prompt "Enter a pre-windows-2000 logon name to translate"
 $userObject = New-Object System.Security.Principal.NTAccount($inputUserObject)
 $SID = $userObject.Translate([System.Security.Principal.SecurityIdentifier])
-Write-Host 'The SID of this User is' $SID.Value
+Write-Host 'The SID of this User is' $SID.Value -ForegroundColor Green
 }
 
 function reset-shell {
-    exit 
+    exit
+}
+
+function Invoke-ContinueMenu {
+    $continueInput = Read-Host -Prompt "Search another? (Y\N)"
+    switch ($continueInput) {
+        Y {invoke-mainmenu}
+        N {exit}
+        Default {invoke-continuemenu}
+    }
 }
 
 function invoke-mainmenu {
@@ -29,6 +43,7 @@ function invoke-mainmenu {
         Q {reset-shell}
         Default {invoke-mainmenu}
     }
+    Invoke-ContinueMenu
 }
 
 invoke-mainmenu
